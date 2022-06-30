@@ -3,42 +3,31 @@ export default class Connection {
   dataChannel;
   dataChannels = new Map();
   
-  async createOffer() {
-    const peerConnection = new RTCPeerConnection({ sdpSemantics: 'unified-plan' });
-    this.createDataChannel(peerConnection);
+  async createOffer(docId) {
+    this.peerConnection = new RTCPeerConnection({ sdpSemantics: 'unified-plan' });
+    this.createDataChannel(docId);
 
-    const offer = await peerConnection.createOffer();
-    await peerConnection.setLocalDescription(offer);
-    this.peerConnection = peerConnection;
-    return peerConnection.localDescription;
+    const offer = await this.peerConnection.createOffer();
+    await this.peerConnection.setLocalDescription(offer);
+
+    this.peerConnection.onconnectionstatechange = () => {
+      console.log('peer connection state change: ', this.peerConnection.connectionState);
+    }
+
+    return this.peerConnection.localDescription;
   }
 
-  createDataChannel(peer) {
-    const dataChannel = peer.createDataChannel('from-ui');
-    console.log('data channel id: ', dataChannel.id, dataChannel.label)
-    dataChannel.addEventListener('message', (message) => {
-      console.log('message receiived: ', message);
-    })
+  createDataChannel(label) {
+    let dataChannel = this.getDataChannel(label);
+    if (dataChannel) return dataChannel;
 
-    this.dataChannel = new Promise((resolve, reject) => {
-      peer.addEventListener('datachannel', (event) => {
-        console.log('on data channel: ', event)
-        resolve(event.channel);
-        console.log('data channel id: ', event.channel.id, event.channel.label)
-        this.dataChannel = event.channel;
-      });
-      dataChannel.addEventListener('error', reject);
-    })
-  }
-
-  createChannel(label) {
-    const dataChannel = this.peerConnection.createDataChannel(label);
+    dataChannel = this.peerConnection.createDataChannel(label);
     this.dataChannels.set(label, dataChannel);
 
     return new Promise((resolve, reject) => {
       dataChannel.addEventListener('open', () => {
-        console.log('ready state: ', dataChannel.readyState);
         resolve(dataChannel);
+        this.dataChannels.set(label, dataChannel);
       });
 
       dataChannel.addEventListener('error', (event) => {
@@ -53,6 +42,10 @@ export default class Connection {
         this.dataChannels.delete(label);
       });
     });
+  }
+
+  getDataChannel(label) {
+    return this.dataChannels.get(label);
   }
 
   async handleAnswer(remoteDescription) {
