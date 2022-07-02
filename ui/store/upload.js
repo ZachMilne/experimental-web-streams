@@ -10,10 +10,10 @@ export const actions = {
         console.log('create prefix');
       },
 
-      async transform(chunk, controller) {
+      transform(chunk, controller) {
         fileSize -= chunk.length;
         console.log('file size: ', fileSize);
-        await wait(100).then(() =>  controller.enqueue(chunk))
+        controller.enqueue(chunk)
       },
 
       flush(controller) {
