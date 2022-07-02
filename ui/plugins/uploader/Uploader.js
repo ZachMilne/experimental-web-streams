@@ -21,8 +21,9 @@ export default class Uploader {
         'Content-Type': 'application/json'
       }
     });
-    const data = await resp.json();
+    if (!resp.ok) throw new Error('Failed to get offer from remote peer connection');
 
+    const data = await resp.json();
     await this.connection.handleAnswer(data.answer);
   }
 
@@ -39,19 +40,18 @@ export default class Uploader {
   }
 
   async read(readable, docId) {
-    const dataChannel = this.connection.getDataChannel(docId);
+    const dataChannel = await this.connection.getDataChannel(docId);
 
     const reader = readable.getReader();
     for (let result = await reader.read(); !result.done; result = await reader.read()) {
       this.sendChunk(dataChannel, result.value);
     }
 
-    dataChannel.close();
+    dataChannel.send('eof');
   }
 
   sendChunk(channel, chunk) {
-    console.log('processing chunk. length: ', chunk.length);
-    const length = 8000;
+    const length = 16000;
     for (let start = 0; start <= chunk.length; start += length) {
       const data = chunk.slice(start, start + length);
       channel.send(data);

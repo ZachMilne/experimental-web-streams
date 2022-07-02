@@ -4,6 +4,7 @@ const { RTCPeerConnection } = DefaultRTCPeerConnection;
 import * as Stream from 'stream';
 import { Buffer } from 'buffer';
 import * as fs from 'fs';
+import { defaultMaxListeners } from 'events';
 
 @Injectable()
 export class WrtcConnections {
@@ -46,13 +47,15 @@ export class WrtcConnections {
   }
 
   onDataChannel(event) {
-    console.log('on data channel', event.channel.label);
     const dataChannel = event.channel;
     const docId = dataChannel.label;
 
     const readableStream = this.getReadable(dataChannel);
     const writableFile = fs.createWriteStream(`./uploads/${docId}.png`);
-    readableStream.pipe(writableFile);
+    const dest = readableStream.pipe(writableFile);
+
+    dest.on('error', () => dest.close);
+    dest.on('close', () => dataChannel.close);
   }
 
   getReadable(dataChannel) {
@@ -61,14 +64,10 @@ export class WrtcConnections {
     });
 
     dataChannel.addEventListener('message', (event) => {
-      console.log(event.data);
+      if (event.data === 'eof') return readableStream.emit('end');
       const buf = Buffer.from(event.data);
       readableStream.push(buf);
     });
-
-    dataChannel.onclose = () => {
-      console.log('close');
-    };
 
     return readableStream;
   }
