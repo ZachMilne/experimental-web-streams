@@ -51,17 +51,23 @@ export class WrtcConnections {
     const docId = dataChannel.label;
 
     const readableStream = this.getReadable(dataChannel);
-    const writableFile = fs.createWriteStream(`./uploads/${docId}.png`);
+    const writableFile = fs.createWriteStream(`./uploads/${docId}.png`, {
+      highWaterMark: 64000
+    });
+    console.log('mark is set at: ', writableFile.writableHighWaterMark)
     const dest = readableStream.pipe(writableFile);
 
     dest.on('error', () => dest.close);
     dest.on('close', () => dataChannel.close);
+    dest.on('drain', () => { console.log('drain'); dataChannel.send('drain')})
   }
 
   getReadable(dataChannel) {
     const readableStream = new Stream.Readable({
       read() {},
     });
+
+    readableStream.on('pause', () => { console.log('pause'); dataChannel.send('pause') })
 
     dataChannel.addEventListener('message', (event) => {
       if (event.data === 'eof') return readableStream.emit('end');
