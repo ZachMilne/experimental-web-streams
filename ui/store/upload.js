@@ -12,7 +12,7 @@ export const actions = {
 
       transform(chunk, controller) {
         fileSize -= chunk.length;
-        console.log('file size: ', fileSize);
+        // console.log('file size: ', fileSize);
         controller.enqueue(chunk)
       },
 
