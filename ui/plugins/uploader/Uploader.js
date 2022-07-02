@@ -1,4 +1,5 @@
 import Connection from './Connection';
+import PressureRegulator from './PressureRegulator';
 
 export default class Uploader {
   connection;
@@ -41,10 +42,15 @@ export default class Uploader {
 
   async read(readable, docId) {
     const dataChannel = await this.connection.getDataChannel(docId);
+    const regulator = new PressureRegulator(dataChannel, {
+      lowWatermark: 32000,
+      highWatermark: 2e6
+    })
 
     const reader = readable.getReader();
     for (let result = await reader.read(); !result.done; result = await reader.read()) {
       this.sendChunk(dataChannel, result.value);
+      await regulator.regulate();
     }
 
     dataChannel.send('eof');
