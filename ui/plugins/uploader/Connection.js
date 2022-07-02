@@ -22,12 +22,10 @@ export default class Connection {
     if (dataChannel) return dataChannel;
 
     dataChannel = this.peerConnection.createDataChannel(label);
-    this.dataChannels.set(label, dataChannel);
 
-    return new Promise((resolve, reject) => {
+    const dataChannelProm = new Promise((resolve, reject) => {
       dataChannel.addEventListener('open', () => {
         resolve(dataChannel);
-        this.dataChannels.set(label, dataChannel);
       });
 
       dataChannel.addEventListener('error', (event) => {
@@ -42,6 +40,8 @@ export default class Connection {
         this.dataChannels.delete(label);
       });
     });
+
+    this.dataChannels.set(label, dataChannelProm);
   }
 
   getDataChannel(label) {
