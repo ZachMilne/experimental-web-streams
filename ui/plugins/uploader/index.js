@@ -1,5 +1,5 @@
 import Uploader from './Uploader';
 
-export default (context, inject) => {
-  inject('uploader', (new Uploader()));
+export default ({ app }, inject) => {
+  inject('uploader', (new Uploader(app.store)));
 }
