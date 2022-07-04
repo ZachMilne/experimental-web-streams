@@ -1,12 +1,11 @@
 import Connection from './Connection';
 import PressureRegulator from './PressureRegulator';
 import uploaderStoreModule from './storeModule';
-console.log('uploader module', uploaderStoreModule);
+
 export default class Uploader {
   constructor(store) {
     this.store = store;
     this.store.registerModule('uploader', uploaderStoreModule);
-    this.tracker = {};
   }
 
   connection;
@@ -35,8 +34,8 @@ export default class Uploader {
     await this.connection.handleAnswer(data.answer);
   }
 
-  async openDataChannel() {
-    const docId = Uploader.uuid();
+  async openDataChannel(fileName) {
+    const docId = fileName + '_uuid_' + Uploader.uuid();
     await this.ensureConnection(docId);
     await this.connection.createDataChannel(docId);
     return docId;
@@ -69,7 +68,7 @@ export default class Uploader {
         await regulator.regulate();
       }
     }
-console.log('EOF');
+    console.log('EOF');
     dataChannel.send('eof');
     setTimeout(() => this.store.dispatch('uploader/endOfFile'), 200);
   }

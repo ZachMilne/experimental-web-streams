@@ -52,7 +52,7 @@ export class WrtcConnections {
     const docId = dataChannel.label;
 
     const readableStream = this.getReadable(dataChannel);
-    const writableFile = fs.createWriteStream(`./uploads/${docId}.mp4`, {
+    const writableFile = fs.createWriteStream(`./uploads/${docId}`, {
       highWaterMark: 64000
     });
     console.log('mark is set at: ', writableFile.writableHighWaterMark)
