@@ -8,6 +8,9 @@ const getters = {
   progress: ({ docId, bytesSent, size }) => {
     if (!docId) return 0;
     return  Math.round((bytesSent/size) * 100)
+  },
+  inProgress({ docId }) {
+    return Boolean(docId);
   }
 }
 
