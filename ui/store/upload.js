@@ -1,6 +1,10 @@
-export const state = () => ({})
+export const state = () => ({
+  uploading: false
+})
 
-export const mutations = {}
+export const mutations = {
+  setUploading: (state, { uploading }) => { state.uploading = uploading}
+}
 
 export const actions = {
     async upload(context, { file }) {
@@ -24,13 +28,17 @@ export const actions = {
 
     let docId;
     try {
-      docId = await this.$uploader.openDataChannel();
+      docId = await this.$uploader.openDataChannel(file.name);
     } catch(err) {
       console.log('Failed to establish rtc data-channel connection', err);
     }
     const readable = file.stream().pipeThrough(transformer);
 
-    this.$uploader.read(readable, { docId, sourceSize: file.size });
+    try {
+      await this.$uploader.read(readable, { docId, sourceSize: file.size });
+    } catch(err) {
+      console.log('Something went wrong with readinig the stream. ', err);
+    }
   }
 }
 
