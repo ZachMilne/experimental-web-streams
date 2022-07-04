@@ -12,11 +12,11 @@ export default class PressureRegulator {
     this.dataChannel.onbufferedamountlow = this.onLowHandler.bind(this);
     this.dataChannel.addEventListener('message', (event) => {
       if (event.data === 'pause') {
-        console.log('pause');
+        console.log('pause', this.dataChannel.bufferedAmount);
         this.flowState = 'paused';
       }
       if (event.data === 'drain') {
-        console.log('drain');
+        console.log('drain', this.dataChannel.bufferedAmount);
         this.flowState = 'open';
         if (this.isQueueUnderHighMark()) console.log('resolve'); this.resolve();
       }

@@ -30,7 +30,7 @@ export const actions = {
     }
     const readable = file.stream().pipeThrough(transformer);
 
-    this.$uploader.read(readable, docId);
+    this.$uploader.read(readable, { docId, sourceSize: file.size });
   }
 }
 

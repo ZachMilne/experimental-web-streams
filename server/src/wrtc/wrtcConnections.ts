@@ -5,6 +5,7 @@ import * as Stream from 'stream';
 import { Buffer } from 'buffer';
 import * as fs from 'fs';
 import { defaultMaxListeners } from 'events';
+import { connectableObservableDescriptor } from 'rxjs/internal/observable/ConnectableObservable';
 
 @Injectable()
 export class WrtcConnections {
@@ -51,7 +52,7 @@ export class WrtcConnections {
     const docId = dataChannel.label;
 
     const readableStream = this.getReadable(dataChannel);
-    const writableFile = fs.createWriteStream(`./uploads/${docId}.png`, {
+    const writableFile = fs.createWriteStream(`./uploads/${docId}.mp4`, {
       highWaterMark: 64000
     });
     console.log('mark is set at: ', writableFile.writableHighWaterMark)
@@ -60,6 +61,10 @@ export class WrtcConnections {
     dest.on('error', () => dest.close);
     dest.on('close', () => dataChannel.close);
     dest.on('drain', () => { console.log('drain'); dataChannel.send('drain')})
+    dest.on('finish', () => { 
+      writableFile.end();
+      dataChannel.close('drain');
+    })
   }
 
   getReadable(dataChannel) {
