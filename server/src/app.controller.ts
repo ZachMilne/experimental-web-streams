@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Req, Res, Body, HttpException } from '@nestjs/common';
+import { Controller, Get, Post, Res, Body, Query } from '@nestjs/common';
 import { AppService } from './app.service';
 import { WrtcConnections } from './wrtc/wrtcConnections';
 import { Request, Response } from 'express';
 import { opendir, open } from 'fs/promises';
+import * as fs from 'fs';
 
 @Controller('api')
 export class AppController {
@@ -33,13 +34,13 @@ export class AppController {
     return files;
   }
 
-  @Post('download')
-  async download(
-    @Req() request: Request,
+  @Get('file')
+  async getFile(
     @Res() response: Response,
-    @Body() body,
+    @Query() query
   ) {
-    //console.log(body);
+    const fileStream = fs.createReadStream(`./uploads/${query.docId}`);
+    fileStream.pipe(response);
   }
 
   @Post('negotiate')
