@@ -4,12 +4,10 @@ const { RTCPeerConnection } = DefaultRTCPeerConnection;
 import * as Stream from 'stream';
 import { Buffer } from 'buffer';
 import * as fs from 'fs';
-import { defaultMaxListeners } from 'events';
-import { connectableObservableDescriptor } from 'rxjs/internal/observable/ConnectableObservable';
 
 @Injectable()
 export class WrtcConnections {
-  private peers: Map<string, any>;
+  private peers: Map<string, RTCPeerConnection>;
   constructor() {
     this.peers = new Map();
   }
@@ -26,19 +24,16 @@ export class WrtcConnections {
     const peerConnection = new RTCPeerConnection({
       sdpSemantics: 'unified-plan',
     });
-
     await peerConnection.setRemoteDescription(offer);
 
     peerConnection.addEventListener('close', () => {
       this.peers.delete(connectionId);
     });
-
     peerConnection.addEventListener('connectionstatechange', () => {
       if (peerConnection.connectionState === 'failed') {
         this.peers.delete(connectionId);
       }
     });
-
     peerConnection.addEventListener(
       'datachannel',
       this.onDataChannel.bind(this),
@@ -55,15 +50,15 @@ export class WrtcConnections {
     const writableFile = fs.createWriteStream(`./uploads/${docId}`, {
       highWaterMark: 64000
     });
-    console.log('mark is set at: ', writableFile.writableHighWaterMark)
+
     const dest = readableStream.pipe(writableFile);
 
-    dest.on('error', () => dest.close);
-    dest.on('close', () => dataChannel.close);
-    dest.on('drain', () => { console.log('drain'); dataChannel.send('drain')})
+    dest.on('error', () => { dest.end() });
+    dest.on('close', () => { dataChannel.close() });
+    dest.on('drain', () => { dataChannel.send('drain')})
     dest.on('finish', () => { 
       writableFile.end();
-      dataChannel.close('drain');
+      dataChannel.close();
     })
   }
 
@@ -72,7 +67,7 @@ export class WrtcConnections {
       read() {},
     });
 
-    readableStream.on('pause', () => { console.log('pause'); dataChannel.send('pause') })
+    readableStream.on('pause', () => { dataChannel.send('pause') });
 
     dataChannel.addEventListener('message', (event) => {
       if (event.data === 'eof') return readableStream.emit('end');
