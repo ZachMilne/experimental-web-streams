@@ -23,14 +23,15 @@
         </v-card-text>
         <v-card-actions>
           <v-file-input
+            ref="fileInput"
             chips
             label="Select a File"
             :disabled="$store.getters['uploader/inProgress']"
             @change="onSelectFile"
           ></v-file-input>
           
-          <v-btn color="primary" class="ml-5" > 
-            Uplaod
+          <v-btn color="primary" class="ml-5" @click="onUploadFile"> 
+            Upload
             <v-icon right dark>
               mdi-cloud-upload
             </v-icon> 
@@ -46,10 +47,16 @@
 export default {
   name: 'IndexPage',
 
+  data: () => ({ file: null }),
+
   methods: {
     onSelectFile(file) {
-      if (file) {
-        this.$store.dispatch('upload/upload', { file })
+      this.file = file;
+    },
+
+    onUploadFile() {
+      if (this.file) {
+        this.$store.dispatch('upload/upload', { file: this.file })
       }
     }
   }
