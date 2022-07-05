@@ -15,7 +15,7 @@
               </v-list-item-content>
 
               <v-list-item-action>
-                <v-btn icon>
+                <v-btn icon @click="downloadHandler(file)">
                   <v-icon color="grey lighten-1">mdi-download</v-icon>
                 </v-btn>
               </v-list-item-action>
@@ -32,14 +32,22 @@
 
 <script>
 export default {
-  name: 'InspirePage',
+  name: 'FilesPage',
+
   computed: {
     files() {
       return this.$store.getters['files/files'];
     }
   },
+
   mounted() {
     this.$store.dispatch('files/getFiles');
+  },
+
+  methods: {
+    downloadHandler(file) {
+      this.$store.dispatch('files/download', { file });
+    }
   }
 }
 </script>

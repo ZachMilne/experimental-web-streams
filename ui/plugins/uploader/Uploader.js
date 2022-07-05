@@ -68,7 +68,7 @@ export default class Uploader {
         await regulator.regulate();
       }
     }
-    console.log('EOF');
+
     dataChannel.send('eof');
     setTimeout(() => this.store.dispatch('uploader/endOfFile'), 200);
   }

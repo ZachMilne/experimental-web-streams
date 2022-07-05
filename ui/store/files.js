@@ -19,9 +19,36 @@ export const actions = {
     } catch(err) {
       console.log('could not fetch files: ', err);
     }
-  }
-}
+  },
 
-function wait(milliseconds) {
-  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+  async download(context, { file }) {
+    const params = new URLSearchParams({ docId: file.docId });
+    const response = await fetch('/api/file?' + params)
+
+    const transformer = new window.TransformStream({
+      transform(chunk, controller) {
+        /**
+         * 
+         * Transform logic goes here! 
+         * 
+         **/
+        controller.enqueue(chunk)
+      },
+      flush(controller) {
+        controller.terminate();
+      }
+    })
+
+    const fileStream = this.$streamSaver.createWriteStream(file.name, {
+      size: file.size
+    })
+
+    try {
+      response.body.pipeThrough(transformer).pipeTo(fileStream)
+    } catch(err) {
+      console.log('error in download stream: ', err);
+    }
+    
+
+  }
 }
