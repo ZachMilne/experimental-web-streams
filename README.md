@@ -23,3 +23,5 @@ Start the UI:
 `cd ui`  
 `npm install`  
 `npm run dev`
+
+navigate to: http://localhost:3000
