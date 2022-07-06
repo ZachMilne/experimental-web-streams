@@ -11,6 +11,7 @@ and responds with the stream. The native browser functionality handles the rest.
 
 ## To run
 
+browser: please use Chrome only  
 node version: 16.x (LTS)
 
 Start the server:  
