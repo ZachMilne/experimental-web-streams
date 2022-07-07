@@ -54,8 +54,6 @@ export default class Uploader {
     const length = 8000;
     for (let start = 0; start <= chunk.length; start += length) {
       const data = chunk.slice(start, start + length);
-      console.log('end index: ', start + length);
-      console.log('slice length: ', data.length);
       channel.send(data);
     }
   }
