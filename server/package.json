@@ -1,5 +1,5 @@
 {
-  "name": "server",
+  "name": "docfly-nest",
   "version": "0.0.1",
   "description": "",
   "author": "",
@@ -23,10 +23,12 @@
   "dependencies": {
     "@nestjs/common": "^7.6.15",
     "@nestjs/core": "^7.6.15",
+    "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^7.6.15",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
-    "rxjs": "^6.6.6"
+    "rxjs": "^6.6.6",
+    "wrtc": "^0.4.7"
   },
   "devDependencies": {
     "@nestjs/cli": "^7.6.0",
